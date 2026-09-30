@@ -3,7 +3,7 @@
 ## Files
 
 ```text
-assignment/
+ds217-26f-03/
 ├── data/bp_readings.csv    # supplied readings; keep this file exactly as handed out
 ├── analysis.py             # starter script: the CSV loader is written, the analysis is yours
 ├── pyproject.toml          # supplied: the project's one direct dependency, numpy
