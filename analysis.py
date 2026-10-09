@@ -31,9 +31,43 @@ def main():
     patient_ids, monitors, hour_columns, readings = load_readings("data/bp_readings.csv")
     print(f"Loaded {readings.shape[0]} patients x {readings.shape[1]} hours")
 
-    # TODO: answer each question in the README's summary table with NumPy.
+    # Each row represents a patient, and each column represents one hour.
+    patient_means = readings.mean(axis=1)
+    hour_means = readings.mean(axis=0)
 
-    # TODO: write one "key: value" line per answer to output/vitals_summary.txt.
+    highest_patient_index = int(patient_means.argmax())
+    peak_hour_index = int(hour_means.argmax())
+
+    # Compare monitor averages using the same patient-level 12-hour means.
+    monitor_names = sorted(set(monitors))
+    monitor_averages = np.array([
+        patient_means[monitors == monitor].mean()
+        for monitor in monitor_names
+    ])
+    high_monitor = monitor_names[int(monitor_averages.argmax())]
+    high_monitor_mask = monitors == high_monitor
+    other_patient_means = patient_means[~high_monitor_mask]
+
+    answers = {
+        "patients": readings.shape[0],
+        "readings": readings.size,
+        "mean_sbp": readings.mean(),
+        "sd_sbp": readings.std(),
+        "min_sbp": readings.min(),
+        "max_sbp": readings.max(),
+        "stage2_patients": np.sum(patient_means >= 140),
+        "highest_patient": patient_ids[highest_patient_index],
+        "highest_patient_mean": patient_means[highest_patient_index],
+        "peak_hour_column": hour_columns[peak_hour_index],
+        "peak_hour_mean": hour_means[peak_hour_index],
+        "high_monitor": high_monitor,
+        "monitor_offset": monitor_averages.max() - other_patient_means.mean(),
+        "stage2_other_monitors": np.sum(other_patient_means >= 140),
+    }
+
+    with open("output/vitals_summary.txt", "w", encoding="utf-8") as file:
+        for key, value in answers.items():
+            file.write(f"{key}: {value}\n")
 
 
 if __name__ == "__main__":
